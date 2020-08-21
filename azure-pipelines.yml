@@ -33,12 +33,18 @@ steps:
 #    platform: '$(buildPlatform)'
 #    configuration: '$(buildConfiguration)'
 
-- task: CopyPublishBuildArtifacts@1
+#- task: CopyPublishBuildArtifacts@1
+#  inputs:
+#    CopyRoot: '$(Build.ArtifactStagingDirectory)'
+#    Contents: 'WebApp.zip'
+#    ArtifactName: 'WebApp'
+#    ArtifactType: 'Container'
+
+- task: PublishPipelineArtifact@1
   inputs:
-    CopyRoot: '$(Build.ArtifactStagingDirectory)'
-    Contents: 'WebApp.zip'
-    ArtifactName: 'WebApp'
-    ArtifactType: 'Container'
+    targetPath: 'WebApp.zip'
+    artifact: 'WebAppArtifact'
+    publishLocation: 'pipeline'
 
 #Your build pipeline references an undefined variable named ‘VERACODE_API_ID’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
 #Your build pipeline references an undefined variable named ‘VERACODE_API_SECRET’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
@@ -50,3 +56,15 @@ steps:
    
   displayName: 'Run pipeline scan'
   continueOnError: true
+
+- task: VeracodePipelineResultImport@0
+  inputs:
+    pipelineResultsJson: 'results.json'
+    outputResultsSarif: 'veracode-results.sarif'
+    findingRuleLevel: '4:3:0'
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: 'veracode-results.sarif'
+    artifact: 'CodeAnalysisLogs'
+    publishLocation: 'pipeline'

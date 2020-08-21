@@ -33,13 +33,6 @@ steps:
 #    platform: '$(buildPlatform)'
 #    configuration: '$(buildConfiguration)'
 
-#- task: CopyPublishBuildArtifacts@1
-#  inputs:
-#    CopyRoot: '$(Build.ArtifactStagingDirectory)'
-#    Contents: 'WebApp.zip'
-#    ArtifactName: 'WebApp'
-#    ArtifactType: 'Container'
-
 - task: PublishPipelineArtifact@1
   inputs:
     targetPath: '$(Build.ArtifactStagingDirectory)\WebApp.zip'

@@ -28,7 +28,25 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
-- task: VSTest@2
+#- task: VSTest@2
+#  inputs:
+#    platform: '$(buildPlatform)'
+#    configuration: '$(buildConfiguration)'
+
+- task: CopyPublishBuildArtifacts@1
   inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    CopyRoot: '$(Build.ArtifactStagingDirectory)'
+    Contents: 'WebApp.zip'
+    ArtifactName: 'WebApp'
+    ArtifactType: 'Container'
+
+#Your build pipeline references an undefined variable named ‘VERACODE_API_ID’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+#Your build pipeline references an undefined variable named ‘VERACODE_API_SECRET’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
+- bash: |
+   curl -O https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
+   unzip pipeline-scan-LATEST.zip pipeline-scan.jar
+   java -jar pipeline-scan.jar  --veracode_api_id "$(VERACODE_API_ID)" --veracode_api_key "$(VERACODE_API_SECRET)" --file "$(Build.ArtifactStagingDirectory)/WebApp.zip" --project_name "$(Build.DefinitionName)"  --project_url "${CI_REPOSITORY_URL}"  --project_ref "$(Build.Repository.Name)" --fail_on_severity="Very High,High"
+   
+  displayName: 'Run pipeline scan'
+  continueOnError: true
